@@ -2,11 +2,11 @@
 
 #include <iostream>
 #include <string>
-#include "bulk_processor.h"
+#include "i_batch_separator.h"
 
 class CommandReader {
 public:
-    explicit CommandReader(std::istream &stream, BatchSeparator &separator)
+    explicit CommandReader(std::istream &stream, IBatchSeparator &separator)
         : stream(stream), separator(separator) {}
 
     void readTillEnd() {
@@ -26,5 +26,5 @@ public:
     }
 private:
     std::istream &stream;
-    BatchSeparator &separator;
+    IBatchSeparator &separator;
 };

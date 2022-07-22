@@ -4,6 +4,7 @@
 
 #include "cmd_reader.h"
 #include "bulk_processor.h"
+#include "batch_separator.h"
 
 int main(int argc, char * argv[]) {
 
@@ -20,7 +21,10 @@ int main(int argc, char * argv[]) {
         return -2;
     }
 
-    BatchSeparator separator {N, [](const std::vector<std::string>&commands) {
+
+    // Handmade dependency injection
+
+    FuncBulkProcessor processor {[](const std::vector<std::string>&commands) {
         std::cout << "bulk: ";
         bool comma = false;
         for (const auto &command : commands) {
@@ -33,7 +37,12 @@ int main(int argc, char * argv[]) {
         std::cout << std::endl;
     }};
 
+    BatchSeparator separator {N, processor};
+
     CommandReader reader {std::cin, separator};
+
+
+    // ... and start!
 
     reader.readTillEnd();
 

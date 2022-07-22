@@ -1,65 +1,19 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstdint>
+#include "i_bulk_processor.h"
+
 #include <functional>
 
-using BulkProcessor = std::function<void(const std::vector<std::string>&)>;
+using BulkProcessorFunc = std::function<void(const std::vector<std::string>&)>;
 
-class BatchSeparator {
+class FuncBulkProcessor : public IBulkProcessor {
 public:
-    BatchSeparator(std::uint32_t batchSize, const BulkProcessor &processor)
-        : batchSize(batchSize), processor(processor) {
-        commands.reserve(batchSize);
-        reset();
-    }
+    explicit FuncBulkProcessor(const BulkProcessorFunc &func)
+        : func(func) {}
 
-    void pushCommand(const std::string &command) {
-        commands.push_back(command);
-        if (braceCounter == 0 && commands.size() == batchSize) {
-            process();
-        }
+    void process(const std::vector<std::string> & commands) override {
+        func(commands);
     }
-
-    void pushOpenBrace() {
-        if (braceCounter == 0 && commands.size() > 0) {
-            process();
-        }
-        ++braceCounter;
-    }
-
-    void pushCloseBrace() {
-        if (braceCounter == 0) {
-            // ignore
-            return;
-        }
-        --braceCounter;
-        if (braceCounter == 0) {
-            process();
-        }
-    }
-
-    void end() {
-        process();
-    }
-
-    void reset() {
-        braceCounter = 0;
-        commands.clear();
-    }
-
 private:
-    const std::uint32_t batchSize;
-    const BulkProcessor processor;
-
-    std::vector<std::string> commands;
-    std::uint32_t braceCounter {};
-
-    void process() {
-        if (commands.size() != 0) {
-            processor(commands);
-        }
-        commands.clear();
-    }
+    const BulkProcessorFunc func;
 };
