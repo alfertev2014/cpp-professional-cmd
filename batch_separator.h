@@ -41,6 +41,10 @@ public:
     }
 
     void end() override {
+        if (braceCounter > 0) {
+            reset();
+            return;
+        }
         process();
     }
 
